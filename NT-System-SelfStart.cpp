@@ -9,6 +9,9 @@
 
 #pragma comment(lib, "Userenv.lib")
 
+/**
+Checks whether the application in running in elevated state
+**/
 bool isElevated() {
 	bool res = false;
 	HANDLE token = NULL;
@@ -25,6 +28,10 @@ bool isElevated() {
 	return res;
 }
 
+/**
+Installs and starts the service that will start our application with TrustedInstaller
+As far as i know, only services can start applications as TI
+**/
 void installAndStartService() {
 	char path[MAX_PATH];
 	GetModuleFileName(NULL, path, MAX_PATH);
@@ -59,6 +66,9 @@ void installAndStartService() {
 	CloseServiceHandle(serviceManager);
 }
 
+/**
+Deletes our elevation service
+**/
 void deleteService() {
 	SC_HANDLE serviceManager = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
@@ -72,6 +82,9 @@ void deleteService() {
 	CloseServiceHandle(serviceManager);
 }
 
+/**
+Checks whether our application is already running with system rights (so TrustedInstaller)
+**/
 bool isSystem() {
 	char username[256];
 	DWORD usernameLen = 256;
@@ -79,6 +92,10 @@ bool isSystem() {
 	return strncmp(username, "SYSTEM", 6) == 0;
 }
 
+/**
+Starts our application as TrustedInstaller by duplicating the winlogons process token
+(winlogon in the current session)
+**/
 bool startAppAsTI() {
 	char path[MAX_PATH];
 	GetModuleFileName(NULL, path, MAX_PATH);
@@ -150,6 +167,9 @@ bool startAppAsTI() {
 	return true;
 }
 
+/**
+Tries to start our application elevated as administrator so that we can deploy the service
+**/
 bool startAppAsAdmin() {
 	char path[MAX_PATH];
 	GetModuleFileName(NULL, path, MAX_PATH);
